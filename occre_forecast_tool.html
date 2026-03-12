@@ -1,79 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<script>
-(function() {
-  var HASH =  + PASSWORD_HASH + ;
-  var SESSION_KEY = 'occre_auth';
-
-  async function sha256(msg) {
-    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
-
-  function showLogin() {
-    document.documentElement.style.visibility = 'hidden';
-    var overlay = document.createElement('div');
-    overlay.id = 'occre-login';
-    overlay.style.cssText = [
-      'position:fixed','top:0','left:0','width:100%','height:100%',
-      'background:#0f1923','display:flex','align-items:center',
-      'justify-content:center','z-index:999999','font-family:Inter,sans-serif',
-      'visibility:visible'
-    ].join(';');
-
-    overlay.innerHTML = `
-      <div style="background:#1a2535;border-radius:16px;padding:48px 56px;width:380px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,0.5);text-align:center;">
-        <div style="font-size:40px;margin-bottom:16px;">📦</div>
-        <div style="font-size:11px;letter-spacing:2px;color:#5c7a9e;text-transform:uppercase;margin-bottom:8px;">OcCre · Forecast Tool</div>
-        <h2 style="color:#e8edf2;font-size:22px;font-weight:600;margin:0 0 32px;">Enter password to continue</h2>
-        <input id="occre-pw" type="password" placeholder="Password"
-          style="width:100%;box-sizing:border-box;padding:14px 18px;border-radius:8px;border:1.5px solid #2d3f55;background:#0f1923;color:#e8edf2;font-size:16px;outline:none;margin-bottom:12px;"
-          onkeydown="if(event.key==='Enter')document.getElementById('occre-login-btn').click()">
-        <div id="occre-err" style="color:#f87171;font-size:13px;min-height:20px;margin-bottom:8px;"></div>
-        <button id="occre-login-btn"
-          style="width:100%;padding:14px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:background 0.2s;"
-          onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-          Unlock
-        </button>
-        <p style="color:#3d5470;font-size:12px;margin-top:24px;margin-bottom:0;">
-          Access is restricted to authorised users only.
-        </p>
-      </div>`;
-
-    document.body.appendChild(overlay);
-    setTimeout(function(){ document.getElementById('occre-pw').focus(); }, 100);
-
-    document.getElementById('occre-login-btn').addEventListener('click', async function() {
-      var pw = document.getElementById('occre-pw').value;
-      var errEl = document.getElementById('occre-err');
-      if (!pw) { errEl.textContent = 'Please enter a password.'; return; }
-      var h = await sha256(pw);
-      if (h === HASH) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        overlay.remove();
-        document.documentElement.style.visibility = '';
-      } else {
-        errEl.textContent = 'Incorrect password. Please try again.';
-        document.getElementById('occre-pw').value = '';
-        document.getElementById('occre-pw').focus();
-      }
-    });
-  }
-
-  if (sessionStorage.getItem(SESSION_KEY) !== '1') {
-    document.addEventListener('DOMContentLoaded', function() {
-      showLogin();
-    });
-    // Also hide immediately
-    var style = document.createElement('style');
-    style.textContent = 'body { visibility: hidden !important; }';
-    style.id = 'occre-hide';
-    document.head && document.head.appendChild(style);
-  }
-})();
-</script>
-  <meta charset="UTF-8">
+<head>  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OcCre · SKU Forecast Tool</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -288,6 +215,7 @@
 </style>
 </head>
 <body>
+<div id="occre-gate" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f1923;z-index:999999;display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif;"><script>(function(){if(sessionStorage.getItem("occre_auth")==="1"){document.currentScript.parentElement.style.display="none";}})();</script><div style="background:#1a2535;border-radius:16px;padding:48px 56px;width:380px;max-width:90vw;box-shadow:0 24px 64px rgba(0,0,0,.5);text-align:center;"><div style="font-size:40px;margin-bottom:16px;">&#128230;</div><div style="font-size:11px;letter-spacing:2px;color:#5c7a9e;text-transform:uppercase;margin-bottom:8px;">OcCre &middot; Forecast Tool</div><h2 style="color:#e8edf2;font-size:22px;font-weight:600;margin:0 0 32px;">Enter password to continue</h2><input id="occre-pw" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:14px 18px;border-radius:8px;border:1.5px solid #2d3f55;background:#0f1923;color:#e8edf2;font-size:16px;outline:none;margin-bottom:12px;" onkeydown="if(event.key==='Enter')document.getElementById('occre-btn').click()"><div id="occre-err" style="color:#f87171;font-size:13px;min-height:20px;margin-bottom:8px;"></div><button id="occre-btn" style="width:100%;padding:14px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-size:16px;font-weight:600;cursor:pointer;" onclick="(async function(){var pw=document.getElementById('occre-pw').value;var e=document.getElementById('occre-err');if(!pw){e.textContent='Please enter a password.';return;}var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));var h=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');if(h==='d65e2f594e7ecee5145401fa2f7eb004f2c61b78550e52d8dbd0405c8b7661e0'){sessionStorage.setItem('occre_auth','1');document.getElementById('occre-gate').style.display='none';}else{e.textContent='Incorrect password. Please try again.';document.getElementById('occre-pw').value='';document.getElementById('occre-pw').focus();}})()">Unlock</button><p style="color:#3d5470;font-size:12px;margin-top:24px;margin-bottom:0;">Access is restricted to authorised users only.</p></div></div>
 
 <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
 <aside class="sidebar">
